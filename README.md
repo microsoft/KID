@@ -21,14 +21,22 @@ KID has been described in the following paper:
 
 ## Getting Started
 
-### Download Datasets
+### Installation
+
+You can install the latest version of KID through:
+
+```bash
+pip install git+https://github.com/microsoft/KID.git@main --upgrade
+```
+
+### Downloading Datasets
 
 All the datasets used for the evaluation of KID can be downloaded in 
 [this link](https://drive.google.com/drive/folders/1PDlZU7fkBQZV62UA8owEqKc142o-azmh?usp=sharing). The statistics of these datasets can be found in the Table A1 (Appendix) of the paper. 
 
 ![](./images/datasets.png)
 
-### Download Knowledge Source
+### Constructing Knowledge Tries
 
 To construct the external knowledge trie for each task, we leverage the Wiki passages and corresponding [FAISS](https://github.com/facebookresearch/faiss) index used by [RAG](https://huggingface.co/docs/transformers/model_doc/rag). We prepare a script in `scrtips/build_trie.py` to 1) download passages and index, and 2) build the knowledge trie by query the context in the training data of a certain task. 
 
@@ -36,7 +44,7 @@ The complete loop of how local knowledge memory and external knowledge trie inte
 
 ![](./images/flow.png)
 
-### Use KID for Decoding
+### Using KID for Decoding
 
 In the demo script (`scripts/run_demo.py`), we show how KID enables knowledge infusing even if the language model (GPT-2) is not fine-tuned. You can run with `python scripts/run_demo.py` with `is_kid=True`, and the output is:
 
