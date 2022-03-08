@@ -59,7 +59,7 @@ While with vanilla sampling decoding (i.e., [Nucleus Sampling](https://arxiv.org
   Health investigate cannabis vs. alcohol impairment effects in adolescents
 ```
 
-Apparently, the language model armed with KID can answer the question in a more informative and coherent way. Note that we can further improve the generation quality by replacing the vanilla GPT-2 with a task fine-tuned one, by using the pre-trained model path for the `model_path` located in the head of `run_demo.py`.
+Apparently, the language model armed with KID can answer the question in a more informative and coherent way. Note that we can further improve the generation quality by replacing the vanilla GPT-2 with a task fine-tuned one, by setting the `model_path` in the head of `run_demo.py` with the path to your pre-trained language model.
 
 ## License
 KID is MIT licensed. See the [LICENSE](./LICENSE.pdf) file for details.
