@@ -26,7 +26,7 @@ KID has been described in the following paper:
 You can install the latest version of KID through:
 
 ```bash
-pip install git+https://github.com/microsoft/KID.git@main --upgrade
+$ pip install git+https://github.com/microsoft/KID.git@main --upgrade
 ```
 
 ### Downloading Datasets
@@ -70,7 +70,7 @@ While with vanilla sampling decoding (i.e., [Nucleus Sampling](https://arxiv.org
 Apparently, the language model armed with KID can answer the question in a more informative and coherent way. Note that we can further improve the generation quality by replacing the vanilla GPT-2 with a task fine-tuned one, by setting the `model_path` in the head of `run_demo.py` with the path to your pre-trained language model.
 
 ## License
-KID is MIT licensed. See the [LICENSE](./LICENSE.pdf) file for details.
+KID is MIT licensed. See the [LICENSE](LICENSE) file for details.
 
 
 
