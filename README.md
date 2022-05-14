@@ -31,6 +31,10 @@ $ pip install git+https://github.com/microsoft/KID.git@main --upgrade
 
 Now you can already run the demo code in `scripts/run_demo.py`, which examplifies a QA sample in [ELI5](https://huggingface.co/datasets/eli5) (see Step 3 for outputs).
 
+Or try the web demo here [![Replicate](https://replicate.com/microsoft/kid/badge)](https://replicate.com/microsoft/kid)
+
+
+
 ### Step 1. Downloading Datasets
 
 All the datasets used for the evaluation of KID can be downloaded in 
