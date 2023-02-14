@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from spacy.lang.en.stop_words import STOP_WORDS
 from spacy.pipeline import EntityRuler
 from spacy.tokens import Token
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, GPTNeoForCausalLM
 
 from KID.infra import Frame
 from KID.policy import BasePolicy
@@ -31,7 +31,10 @@ class KIDPolicy(BasePolicy):
         super(KIDPolicy, self).__init__()
         self.device = device
         self.tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-        self.model = GPT2LMHeadModel.from_pretrained(model_name)
+        if 'gpt2' in model_name:
+            self.model = GPT2LMHeadModel.from_pretrained(model_name)
+        elif 'gpt-neo' in model_name:
+            self.model = GPTNeoForCausalLM.from_pretrained(model_name)
         self.model.to(self.device)
 
         # freezing weights of the LM,
@@ -229,7 +232,10 @@ class KIDPolicy(BasePolicy):
         :param encodings:
         :return:
         """
-        max_length = self.model.config.n_positions
+        if hasattr(self.model.config, 'n_positions'):
+            max_length = self.model.config.n_positions
+        else:
+            max_length = self.model.config.max_position_embeddings
 
         nlls = []
         for i in range(0, encodings.size(1), self.stride):
