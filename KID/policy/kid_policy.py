@@ -192,6 +192,9 @@ class KIDPolicy(BasePolicy):
         kid_last_logits = kid_logits[:, -1, :]
         kid_last_probs = F.softmax(kid_last_logits, dim=-1)
 
+        # tackle case where no knowledge term token id has been retrieved (otherwise it crashes)
+        if len(kg_indices) == 0:
+            kg_indices = [[self.tokenizer.eos_token_id]]
         one_hot_neg_vec = self._build_one_hot_vec(kg_indices).detach()
 
         policy_Q = -torch.log(torch.sum(torch.mm(kid_last_probs, one_hot_neg_vec.T)))
