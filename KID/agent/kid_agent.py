@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from nltk.corpus import stopwords
 from spacy.pipeline import EntityRuler
 from spacy.tokens import Token
-from transformers import GPT2Tokenizer
+from transformers import AutoTokenizer
 
 from KID.agent import BaseAgent
 from KID.agent.agent_utils import calc_banned_ngram_tokens, top_k_filter, top_p_filter
@@ -30,6 +30,7 @@ class KIDAgent(BaseAgent):
         env: BaseEnv,
         policy: BasePolicy,
         is_kid: bool,
+        model_name : str = 'gpt2-medium'
     ):
         super(KIDAgent, self).__init__()
         self.env = env
@@ -51,7 +52,10 @@ class KIDAgent(BaseAgent):
         self._cur_norm_ids = torch.empty(0)
         self._cur_kid_ids = torch.empty(0)
 
-        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2-medium')
+        if '/opt-' in model_name: # hacky way to detect if using OPT
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def forward(self, action: 'Frame') -> 'Frame':
 

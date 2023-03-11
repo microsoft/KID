@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from spacy.lang.en.stop_words import STOP_WORDS
 from spacy.pipeline import EntityRuler
 from spacy.tokens import Token
-from transformers import GPT2LMHeadModel, GPT2Tokenizer, GPTNeoForCausalLM
+from transformers import AutoTokenizer, GPT2Tokenizer, GPT2LMHeadModel, GPTNeoForCausalLM, OPTForCausalLM
 
 from KID.infra import Frame
 from KID.policy import BasePolicy
@@ -30,11 +30,20 @@ class KIDPolicy(BasePolicy):
     def __init__(self, model_name: str, device: str, kt_path: str):
         super(KIDPolicy, self).__init__()
         self.device = device
-        self.tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+        if '/opt-' in model_name:
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
+        else:
+            #self.tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+        self.OPT_FLAG = False # Flag for HF bug related to OPT
         if 'gpt2' in model_name:
             self.model = GPT2LMHeadModel.from_pretrained(model_name)
         elif 'gpt-neo' in model_name:
             self.model = GPTNeoForCausalLM.from_pretrained(model_name)
+        elif '/opt-' in model_name:
+            self.model = OPTForCausalLM.from_pretrained(model_name)
+            self.OPT_FLAG = True
         self.model.to(self.device)
 
         # freezing weights of the LM,
@@ -68,7 +77,8 @@ class KIDPolicy(BasePolicy):
         related_kgs = list(set(self.update_knowledge(cur_gen_toks)))
 
         kg_indices = [
-            self.tokenizer.encode(word.strip(), add_prefix_space=True)
+            #self.tokenizer.encode(word.strip(), add_prefix_space=True)
+            self.tokenizer.encode(word.strip())
             for word in related_kgs
         ]
 
@@ -182,9 +192,17 @@ class KIDPolicy(BasePolicy):
         :return:
         """
 
+        if self.OPT_FLAG:
+            past_kv_length = kid_past[0][0].shape[2]
+            bs = kid_past[0][0].shape[0]
+            attn = torch.ones(bs, past_kv_length + last.size(-1)).to(last.device)
+        else:
+            attn = None
+            
         kid_logits, _, kid_all_hidden = self.model(
             last,
             past_key_values=kid_past,
+            attention_mask=attn,
             return_dict=False,
             output_hidden_states=True
         )
@@ -222,7 +240,8 @@ class KIDPolicy(BasePolicy):
             return None
 
         indices = [ind[0] for ind in indices]
-        oh_vec = torch.zeros(len(indices), len(self.tokenizer)).to(self.device)
+        #oh_vec = torch.zeros(len(indices), len(self.tokenizer)).to(self.device)
+        oh_vec = torch.zeros(len(indices), self.model.config.vocab_size).to(self.device)
         oh_vec.scatter_(1, torch.tensor(indices).to(self.device).unsqueeze(1), 1)
         return oh_vec
 

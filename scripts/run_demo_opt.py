@@ -8,17 +8,16 @@ from transformers import AutoTokenizer
 
 import KID
 from KID.agent import KIDAgent
-from KID.envs import GPTNeoEnv
+from KID.envs import OPTEnv
 from KID.infra import Frame
 from KID.policy import KIDPolicy
 
-model_path = 'EleutherAI/gpt-neo-1.3B'
 
 if __name__ == '__main__':
 
     max_seq_len = 63
     num_gen_seq = 5
-    trained_model_name = 'EleutherAI/gpt-neo-1.3B'
+    trained_model_name = 'facebook/opt-350m'
     device = 'cuda:0'
 
     seeds = [0, 128, 256, 512, 1024, 2048]
@@ -30,25 +29,22 @@ if __name__ == '__main__':
     knowledge_trie_path = os.path.join(assets_path, "dummy_trie.pickle")
 
     # init
-    tokenizer = AutoTokenizer.from_pretrained(trained_model_name)
+    tokenizer = AutoTokenizer.from_pretrained(trained_model_name, use_fast=False) # OPT tokenizer
     q = "Does marijuana impair driving ability?"
     tokenized_q = tokenizer.encode(tokenizer.bos_token + q)
     tokenized_q_ids = torch.tensor(tokenized_q, device=device, dtype=torch.long)
 
     # envs
-    env = GPTNeoEnv(model_name=model_path, max_len=max_seq_len, device=device)
+    env = OPTEnv(model_name=trained_model_name, max_len=max_seq_len, device=device)
     env.reset()
 
     # policy
     kid_policy = KIDPolicy(
-        model_name=model_path, device=device, kt_path=knowledge_trie_path
+        model_name=trained_model_name, device=device, kt_path=knowledge_trie_path
     )
 
     # agent
-    if is_kid:
-        agent = KIDAgent(env=env, policy=kid_policy, is_kid=True, model_name=trained_model_name)
-    else:
-        agent = KIDAgent(env=env, policy=kid_policy, is_kid=False)
+    agent = KIDAgent(env=env, policy=kid_policy, is_kid=is_kid, model_name=trained_model_name)
 
     norm_gen_text, kid_gen_text, kid_ppls = '', [], []
     for n in range(num_gen_seq):
