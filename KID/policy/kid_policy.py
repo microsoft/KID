@@ -175,7 +175,7 @@ class KIDPolicy(BasePolicy):
             for ent in local_kg:
                 for span in self.kg_trie.keys(ent):
                     related_kgs.extend(span.split(' '))
-                    local_kg = related_kgs
+            local_kg = related_kgs
 
         return related_kgs
 

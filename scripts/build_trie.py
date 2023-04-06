@@ -84,7 +84,9 @@ def convert2kg(texts: List[str], client: Any):
     for text in texts:
         resolved_text = nlp(text)._.coref_resolved
         for triple in client.annotate(resolved_text):
-            str_list.append(triple['subject'] + ' ' + triple['object'])
+            subject_ent = return_entities(triple['subject'])
+            object_ent = return_entities(triple['object'])
+            str_list.append(' '.join(subject_ent + object_ent))
     return str_list
 
 
